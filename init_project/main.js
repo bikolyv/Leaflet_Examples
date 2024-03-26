@@ -1,39 +1,23 @@
 
-var map = L.map('map-container').setView([42.705, 23.15], 13);
+var map = L.map('map-container').fitWorld();
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-var marker = L.marker([42.705, 23.15]).addTo(map);
+map.locate({setView: true, maxZoom: 16});
 
-var circle = L.circle([42.705, 23.15], {
-    color: 'red',
-    fillColor: '#f03',
-    fillOpacity: 0.5,
-    radius: 500
-}).addTo(map);
+function onLocationFound(e) {
+    var radius = e.accurace;
 
-var polygon = L.polygon([
-    [42.702, 23.12],
-    [42.700, 23.10],
-    [42.707, 23.17]
-]).addTo(map);
-
-marker.bindPopup("<b>Hello there</b><br>I am awsome").openPopup();
-circle.bindPopup("I am circle");
-polygon.bindPopup("I am polygon");
-
-var popup = L.popup()
-    .setLatLng([42.715, 23.12])
-    .setContent("Look at me")
-    .openOn(map);
-
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent("gegeeg " + e.latlng.toString())
-        .openOn(map);
+    L.marker(e.latlng).addTo(map)
+        .bindPopup("You are within " + radius + " meters from this point").openPopup();
+    L.circle(e.latlng, radius).addTo(map);
 }
-map.on('click', onMapClick);
+map.on('locationfound', onLocationFound);
+
+function onLocationError(e) {
+    alert(e.message);
+}
+map.on('locationerror', onLocationError);
